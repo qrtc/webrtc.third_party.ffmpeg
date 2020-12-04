@@ -27,7 +27,7 @@
 #include "libavcodec/x86/idctdsp.h"
 
 #include "idctdsp.h"
-#include "simple_idct.h"
+#include "x86_simple_idct.h"
 
 #if HAVE_INLINE_ASM
 

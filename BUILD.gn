@@ -213,6 +213,7 @@ target(link_target_type, "ffmpeg_internal") {
     "//third_party/opus",
     "//third_party/x264",
     "//third_party/fdkaac",
+    "//third_party/xz",
   ]
 
   configs -= [ "//build/config/compiler:chromium_code" ]
