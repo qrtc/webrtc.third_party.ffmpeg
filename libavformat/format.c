@@ -173,7 +173,6 @@ AVInputFormat *av_find_input_format(const char *short_name)
 AVInputFormat *av_probe_input_format3(AVProbeData *pd, int is_opened,
                                       int *score_ret)
 {
-    av_log(NULL,AV_LOG_INFO,"filename: %s   bufsize: %d",pd->filename,pd->buf_size);
     AVProbeData lpd = *pd;
     AVInputFormat *fmt1 = NULL, *fmt;
     int score, score_max = 0;
