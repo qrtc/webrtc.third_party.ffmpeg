@@ -20,7 +20,7 @@
 
 #include "libavcodec/x86/fdct.h"
 #include "libavcodec/x86/xvididct.h"
-#include "libavcodec/x86/simple_idct.h"
+#include "libavcodec/x86/x86_simple_idct.h"
 
 #if (CONFIG_PRORES_DECODER || CONFIG_PRORES_LGPL_DECODER) && ARCH_X86_64 && HAVE_YASM
 void ff_prores_idct_put_10_sse2(uint16_t *dst, int linesize,
