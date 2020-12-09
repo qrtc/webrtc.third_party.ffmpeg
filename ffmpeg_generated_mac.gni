@@ -218,7 +218,7 @@ if (is_mac) {
     "libavformat/rmsipr.c",
     "libavformat/tcp.c",
     "libavformat/tls.c",
-    "libavformat/tls_securetransport.c",
+    "libavformat/tls_openssl.c",
     "libavformat/url.c",
     "libavformat/urldecode.c",
     "libavformat/vorbiscomment.c",

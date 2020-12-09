@@ -214,6 +214,7 @@ target(link_target_type, "ffmpeg_internal") {
     "//third_party/x264",
     "//third_party/fdkaac",
     "//third_party/xz",
+    "//third_party/boringssl",
   ]
 
   configs -= [ "//build/config/compiler:chromium_code" ]
