@@ -23,7 +23,7 @@
 #include "libavcodec/avcodec.h"
 #include "libavcodec/idctdsp.h"
 #include "idctdsp.h"
-#include "simple_idct.h"
+#include "x86_simple_idct.h"
 
 /* Input permutation for the simple_idct_mmx */
 static const uint8_t simple_mmx_permutation[64] = {
