@@ -267,6 +267,7 @@ External library support:
   --enable-libwebp         enable WebP encoding via libwebp [no]
   --enable-libx264         enable H.264 encoding via x264 [no]
   --enable-libx265         enable HEVC encoding via x265 [no]
+  --enable-libxcoder       enable NetInt Xcoder [no]
   --enable-libxavs         enable AVS encoding via xavs [no]
   --enable-libxcb          enable X11 grabbing using XCB [autodetect]
   --enable-libxcb-shm      enable X11 grabbing shm communication [autodetect]
@@ -1500,6 +1501,7 @@ EXTERNAL_LIBRARY_GPL_LIST="
     libvidstab
     libx264
     libx265
+    libxcoder
     libxavs
     libxvid
 "
@@ -2895,6 +2897,10 @@ libx264_encoder_deps="libx264"
 libx264rgb_encoder_deps="libx264 x264_csp_bgr"
 libx264rgb_encoder_select="libx264_encoder"
 libx265_encoder_deps="libx265"
+h264_ni_decoder_deps="libxcoder"
+h265_ni_encoder_deps="libxcoder"
+h265_ni_decoder_deps="libxcoder"
+h264_ni_encoder_deps="libxcoder"
 libxavs_encoder_deps="libxavs"
 libxvid_encoder_deps="libxvid"
 libzvbi_teletext_decoder_deps="libzvbi"
@@ -5031,7 +5037,7 @@ touch "$link_dest/test_file"
 #     source_link="$source_path"
 # fi
 # TODO(chcunningham): Figure out why the above breaks our build_ffmpeg.py. cl.exe does not play nice with symlinks.
-# Hardcoding the else case for now. 
+# Hardcoding the else case for now.
 source_link="$source_path"
 
 # cleanup
@@ -5894,6 +5900,7 @@ enabled libx264           && { use_pkg_config x264 "stdint.h x264.h" x264_encode
 enabled libx265           && require_pkg_config x265 x265.h x265_api_get &&
                              { check_cpp_condition x265.h "X265_BUILD >= 68" ||
                                die "ERROR: libx265 version must be >= 68."; }
+enabled libxcoder         && require_pkg_config libxcoder xcoder ni_device_api.h ni_device_open
 enabled libxavs           && require libxavs "stdint.h xavs.h" xavs_encoder_encode -lxavs
 enabled libxvid           && require libxvid xvid.h xvid_global -lxvidcore
 enabled libzimg           && require_pkg_config "zimg >= 2.3.0" zimg.h zimg_get_api_version
