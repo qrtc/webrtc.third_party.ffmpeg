@@ -643,6 +643,10 @@ static void register_all(void)
 
     /* external libraries, that shouldn't be used by default if one of the
      * above is available */
+    REGISTER_DECODER(H264_NI,           h264_ni);
+    REGISTER_DECODER(H265_NI,           h265_ni);
+    REGISTER_ENCODER(H265_NI,           h265_ni);
+    REGISTER_ENCODER(H264_NI,           h264_ni);
     REGISTER_ENCDEC (LIBOPENH264,       libopenh264);
     REGISTER_DECODER(H264_CUVID,        h264_cuvid);
     REGISTER_ENCODER(H264_NVENC,        h264_nvenc);
