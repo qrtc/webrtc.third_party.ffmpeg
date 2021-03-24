@@ -123,6 +123,9 @@ static int hevc_mp4toannexb_filter(AVBSFContext *ctx, AVPacket *out)
 
     int got_irap = 0;
     int i, ret = 0;
+    // NetInt don't prepend extradata to IRAP frames if VPS/SPS/PPS already
+    // in the packet
+    int has_header = 0, has_vps = 0, has_sps = 0, has_pps = 0;
 
     ret = ff_bsf_get_packet(ctx, &in);
     if (ret < 0)
@@ -145,10 +148,14 @@ static int hevc_mp4toannexb_filter(AVBSFContext *ctx, AVPacket *out)
             nalu_size = (nalu_size << 8) | bytestream2_get_byte(&gb);
 
         nalu_type = (bytestream2_peek_byte(&gb) >> 1) & 0x3f;
+        has_vps |= (HEVC_NAL_VPS == nalu_type);
+        has_sps |= (HEVC_NAL_SPS == nalu_type);
+        has_pps |= (HEVC_NAL_PPS == nalu_type);
+        has_header = (has_vps && has_sps && has_pps);
 
         /* prepend extradata to IRAP frames */
         is_irap       = nalu_type >= 16 && nalu_type <= 23;
-        add_extradata = is_irap && !got_irap;
+        add_extradata = is_irap && !has_header && !got_irap;
         extra_size    = add_extradata * ctx->par_out->extradata_size;
         got_irap     |= is_irap;
 
