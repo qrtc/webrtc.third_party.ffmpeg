@@ -133,6 +133,26 @@ enum AVFrameSideDataType {
      * the form of the AVContentLightMetadata struct.
      */
     AV_FRAME_DATA_CONTENT_LIGHT_LEVEL,
+
+
+    // NETINT: custom SEI data
+    /**
+     * This side data takes SEI payload type USER_DATA_UNREGISTERED.
+     * There will be no byte reordering.
+     * Usually this payload would be: 16B UUID + other payload Bytes.
+     */
+    AV_FRAME_DATA_NETINT_UDU_SEI,
+    // NETINT: custom bitrate adjustment
+    /**
+     * This side data takes int32_t type data as payload which indicates the new target bitrate value.
+     */
+    AV_FRAME_DATA_NETINT_BITRATE,
+    // NETINT: long term reference frame support
+    /**
+     * This side data is a struct of AVNetintLongTermRef that specifies a
+     * frame's support of long term reference frame.
+     */
+    AV_FRAME_DATA_NETINT_LONG_TERM_REF,
 };
 
 enum AVActiveFormatDescription {
@@ -159,6 +179,20 @@ typedef struct AVFrameSideData {
     AVDictionary *metadata;
     AVBufferRef *buf;
 } AVFrameSideData;
+
+/**
+ * NETINT: Structure describing long term reference frame support.
+ *
+ */
+typedef struct AVNetintLongTermRef {
+    // A flag for the current picture to be used as a long term reference
+    // picture later at other pictures' encoding
+    uint8_t use_cur_src_as_long_term_pic;
+
+    // A flag to use a long term reference picture in DPB when encoding the
+    // current picture
+    uint8_t use_long_term_ref;
+} AVNetintLongTermRef;
 
 /**
  * This structure describes decoded (raw) audio or video data.
