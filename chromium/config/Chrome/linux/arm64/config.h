@@ -9,7 +9,7 @@
 #define CC_IDENT "gcc 4.8 (Ubuntu/Linaro 4.8.4-2ubuntu1~14.04.1)"
 #define av_restrict restrict
 #define EXTERN_PREFIX ""
-#define EXTERN_ASM 
+#define EXTERN_ASM
 #define BUILDSUF ""
 #define SLIBSUF ".so"
 #define HAVE_MMX2 HAVE_MMXEXT

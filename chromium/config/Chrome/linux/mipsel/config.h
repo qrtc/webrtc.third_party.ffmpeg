@@ -9,7 +9,7 @@
 #define CC_IDENT "gcc 4.9.x (4.9.2_cos_gg_4.9.2-r154-32c89c19b042a12b5a1bf0153299154ea5435c03_4.9.2-r154) 20150123 (prerelease)"
 #define av_restrict restrict
 #define EXTERN_PREFIX ""
-#define EXTERN_ASM 
+#define EXTERN_ASM
 #define BUILDSUF ""
 #define SLIBSUF ".so"
 #define HAVE_MMX2 HAVE_MMXEXT

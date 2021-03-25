@@ -9,7 +9,7 @@
 #define CC_IDENT "gcc 4.8 (Ubuntu 4.8.4-2ubuntu1~14.04.3)"
 #define av_restrict restrict
 #define EXTERN_PREFIX ""
-#define EXTERN_ASM 
+#define EXTERN_ASM
 #define BUILDSUF ""
 #define SLIBSUF ".so"
 #define HAVE_MMX2 HAVE_MMXEXT
@@ -747,6 +747,10 @@
 #define CONFIG_H263I_DECODER 0
 #define CONFIG_H263P_DECODER 0
 #define CONFIG_H264_DECODER 1
+#define CONFIG_H264_NI_DECODER 1
+#define CONFIG_H265_NI_DECODER 1
+#define CONFIG_H265_NI_ENCODER 1
+#define CONFIG_H264_NI_ENCODER 1
 #define CONFIG_H264_CRYSTALHD_DECODER 0
 #define CONFIG_H264_MEDIACODEC_DECODER 0
 #define CONFIG_H264_MMAL_DECODER 0
