@@ -25,6 +25,7 @@
 #ifndef AVUTIL_FRAME_H
 #define AVUTIL_FRAME_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "avutil.h"
@@ -134,6 +135,12 @@ enum AVFrameSideDataType {
      */
     AV_FRAME_DATA_CONTENT_LIGHT_LEVEL,
 
+    /**
+     * The data contains an ICC profile as an opaque octet buffer following the
+     * format described by ISO 15076-1 with an optional name defined in the
+     * metadata key entry "name".
+     */
+    AV_FRAME_DATA_ICC_PROFILE,
 
     // NETINT: custom SEI data
     /**
@@ -142,11 +149,13 @@ enum AVFrameSideDataType {
      * Usually this payload would be: 16B UUID + other payload Bytes.
      */
     AV_FRAME_DATA_NETINT_UDU_SEI,
+
     // NETINT: custom bitrate adjustment
     /**
      * This side data takes int32_t type data as payload which indicates the new target bitrate value.
      */
     AV_FRAME_DATA_NETINT_BITRATE,
+
     // NETINT: long term reference frame support
     /**
      * This side data is a struct of AVNetintLongTermRef that specifies a
@@ -185,13 +194,13 @@ typedef struct AVFrameSideData {
  *
  */
 typedef struct AVNetintLongTermRef {
-    // A flag for the current picture to be used as a long term reference
-    // picture later at other pictures' encoding
-    uint8_t use_cur_src_as_long_term_pic;
+  // A flag for the current picture to be used as a long term reference
+  // picture later at other pictures' encoding
+  uint8_t use_cur_src_as_long_term_pic;
 
-    // A flag to use a long term reference picture in DPB when encoding the
-    // current picture
-    uint8_t use_long_term_ref;
+  // A flag to use a long term reference picture in DPB when encoding the
+  // current picture
+  uint8_t use_long_term_ref;
 } AVNetintLongTermRef;
 
 /**
@@ -274,9 +283,18 @@ typedef struct AVFrame {
     uint8_t **extended_data;
 
     /**
-     * width and height of the video frame
+     * @name Video dimensions
+     * Video frames only. The coded dimensions (in pixels) of the video frame,
+     * i.e. the size of the rectangle that contains some well-defined values.
+     *
+     * @note The part of the frame intended for display/presentation is further
+     * restricted by the @ref cropping "Cropping rectangle".
+     * @{
      */
     int width, height;
+    /**
+     * @}
+     */
 
     /**
      * number of audio samples (per channel) described by this frame
@@ -564,6 +582,22 @@ typedef struct AVFrame {
      * purpose.
      */
     AVBufferRef *opaque_ref;
+
+    /**
+     * @anchor cropping
+     * @name Cropping
+     * Video frames only. The number of pixels to discard from the the
+     * top/bottom/left/right border of the frame to obtain the sub-rectangle of
+     * the frame intended for presentation.
+     * @{
+     */
+    size_t crop_top;
+    size_t crop_bottom;
+    size_t crop_left;
+    size_t crop_right;
+    /**
+     * @}
+     */
 } AVFrame;
 
 /**
@@ -682,7 +716,9 @@ void av_frame_move_ref(AVFrame *dst, AVFrame *src);
  *           cases.
  *
  * @param frame frame in which to store the new buffers.
- * @param align required buffer size alignment
+ * @param align Required buffer size alignment. If equal to 0, alignment will be
+ *              chosen automatically for the current CPU. It is highly
+ *              recommended to pass 0 here unless you know what you are doing.
  *
  * @return 0 on success, a negative AVERROR on error.
  */
@@ -773,6 +809,40 @@ AVFrameSideData *av_frame_get_side_data(const AVFrame *frame,
  * from the frame.
  */
 void av_frame_remove_side_data(AVFrame *frame, enum AVFrameSideDataType type);
+
+
+/**
+ * Flags for frame cropping.
+ */
+enum {
+    /**
+     * Apply the maximum possible cropping, even if it requires setting the
+     * AVFrame.data[] entries to unaligned pointers. Passing unaligned data
+     * to FFmpeg API is generally not allowed, and causes undefined behavior
+     * (such as crashes). You can pass unaligned data only to FFmpeg APIs that
+     * are explicitly documented to accept it. Use this flag only if you
+     * absolutely know what you are doing.
+     */
+    AV_FRAME_CROP_UNALIGNED     = 1 << 0,
+};
+
+/**
+ * Crop the given video AVFrame according to its crop_left/crop_top/crop_right/
+ * crop_bottom fields. If cropping is successful, the function will adjust the
+ * data pointers and the width/height fields, and set the crop fields to 0.
+ *
+ * In all cases, the cropping boundaries will be rounded to the inherent
+ * alignment of the pixel format. In some cases, such as for opaque hwaccel
+ * formats, the left/top cropping is ignored. The crop fields are set to 0 even
+ * if the cropping was rounded or ignored.
+ *
+ * @param frame the frame which should be cropped
+ * @param flags Some combination of AV_FRAME_CROP_* flags, or 0.
+ *
+ * @return >= 0 on success, a negative AVERROR on error. If the cropping fields
+ * were invalid, AVERROR(ERANGE) is returned, and nothing is changed.
+ */
+int av_frame_apply_cropping(AVFrame *frame, int flags);
 
 /**
  * @return a string identifying the side data type
