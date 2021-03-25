@@ -212,6 +212,7 @@ target(link_target_type, "ffmpeg_internal") {
     ":ffmpeg_features",
     "//third_party/opus",
     "//third_party/x264",
+    "//third_party/libxcoder",
     "//third_party/fdkaac",
     "//third_party/xz",
     "//third_party/boringssl",
