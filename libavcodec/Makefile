@@ -338,6 +338,10 @@ OBJS-$(CONFIG_H264_VAAPI_ENCODER)      += vaapi_encode_h264.o vaapi_encode_h26x.
 OBJS-$(CONFIG_H264_VIDEOTOOLBOX_ENCODER) += videotoolboxenc.o
 OBJS-$(CONFIG_HAP_DECODER)             += hapdec.o hap.o
 OBJS-$(CONFIG_HAP_ENCODER)             += hapenc.o hap.o
+OBJS-$(CONFIG_H264_NI_DECODER)         += nidec_h264.o nicodec.o nidec.o
+OBJS-$(CONFIG_H265_NI_DECODER)         += nidec_hevc.o nicodec.o nidec.o
+OBJS-$(CONFIG_H265_NI_ENCODER)         += nienc_h265.o nicodec.o nienc.o
+OBJS-$(CONFIG_H264_NI_ENCODER)         += nienc_h264.o nicodec.o nienc.o
 OBJS-$(CONFIG_HEVC_DECODER)            += hevcdec.o hevc_mvs.o \
                                           hevc_cabac.o hevc_refs.o hevcpred.o    \
                                           hevcdsp.o hevc_filter.o hevc_data.o
