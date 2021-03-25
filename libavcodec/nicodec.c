@@ -75,7 +75,7 @@ int ff_xcoder_dec_close(AVCodecContext *avctx,
                         XCoderH264DecContext *s)
 {
   ni_retcode_t ret = NI_RETCODE_FAILURE;
-  
+
   ret = ni_device_session_close(&s->api_ctx, s->eos, NI_DEVICE_TYPE_DECODER);
   if (NI_RETCODE_SUCCESS != ret)
   {
@@ -89,7 +89,7 @@ int ff_xcoder_dec_close(AVCodecContext *avctx,
 #endif
   s->api_ctx.device_handle = NI_INVALID_DEVICE_HANDLE;
   s->api_ctx.blk_io_handle = NI_INVALID_DEVICE_HANDLE;
-  
+
   return 0;
 }
 
@@ -752,7 +752,7 @@ int ff_xcoder_dec_send(AVCodecContext *avctx,
   {
     return AVERROR(EAGAIN);
   }
-  
+
   return sent;
 
 fail:
@@ -920,7 +920,8 @@ int ff_xcoder_dec_receive(AVCodecContext *avctx, XCoderH264DecContext *s,
      instance */
   int ret = 0;
   int got_frame = 0;
-  ni_session_data_io_t session_io_data = {0};
+  ni_session_data_io_t session_io_data;
+  memset(&session_io_data, 0x00, sizeof(ni_session_data_io_t));
   ni_session_data_io_t * p_session_data = &session_io_data;
   int width, height;
 
@@ -929,20 +930,20 @@ int ff_xcoder_dec_receive(AVCodecContext *avctx, XCoderH264DecContext *s,
     return AVERROR_EOF;
   }
 
-  // if active video resolution has been obtained we just use it as it's the 
-  // exact size of frame to be returned, otherwise we use what we are told by 
+  // if active video resolution has been obtained we just use it as it's the
+  // exact size of frame to be returned, otherwise we use what we are told by
   // upper stream as the initial setting and it will be adjusted.
   width = s->api_ctx.active_video_width > 0 ? s->api_ctx.active_video_width :  avctx->width;
   height = s->api_ctx.active_video_height > 0 ? s->api_ctx.active_video_height : avctx->height;
 
   // allocate memory only after resolution is known (buffer pool set up)
-  int alloc_mem = (s->api_ctx.active_video_width > 0 && 
+  int alloc_mem = (s->api_ctx.active_video_width > 0 &&
                    s->api_ctx.active_video_height > 0 ? 1 : 0);
   ret = ni_decoder_frame_buffer_alloc(
     s->api_ctx.dec_fme_buf_pool, &(p_session_data->data.frame), alloc_mem,
     width, height,
     (avctx->codec_id == AV_CODEC_ID_H264), s->api_ctx.bit_depth_factor);
-                          
+
   if (NI_RETCODE_SUCCESS != ret)
   {
     return AVERROR_EXTERNAL;
@@ -997,7 +998,7 @@ int ff_xcoder_dec_receive(AVCodecContext *avctx, XCoderH264DecContext *s,
 #endif
     av_log(avctx, AV_LOG_DEBUG, "ff_xcoder_dec_receive: pkt_timebase= %d/%d, frame_rate=%d/%d, frame->pts=%" PRId64 ", frame->pkt_dts=%" PRId64 "\n", avctx->pkt_timebase.num, avctx->pkt_timebase.den, avctx->framerate.num, avctx->framerate.den, frame->pts, frame->pkt_dts);
 
-    // release buffer ownership and let frame owner return frame buffer to 
+    // release buffer ownership and let frame owner return frame buffer to
     // buffer pool later
     p_session_data->data.frame.dec_buf = NULL;
 
@@ -1012,7 +1013,7 @@ int ff_xcoder_dec_receive(AVCodecContext *avctx, XCoderH264DecContext *s,
   {
     av_log(avctx, AV_LOG_ERROR, "Failed to get output buffer (status = %d)\n",
            ret);
-    
+
     if (NI_RETCODE_ERROR_VPU_RECOVERY == ret)
     {
       av_log(avctx, AV_LOG_WARNING, "ff_xcoder_dec_receive VPU recovery, need to reset ..\n");

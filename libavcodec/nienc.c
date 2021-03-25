@@ -365,12 +365,12 @@ static int xcoder_setup_encoder(AVCodecContext *avctx)
   ni_encoder_params_t *p_param = &s->api_param;
   ni_encoder_params_t *pparams = NULL;
   ni_session_run_state_t prev_state = s->api_ctx.session_run_state;
- 
+
   av_log(avctx, AV_LOG_DEBUG, "XCoder setup device encoder\n");
   //s->api_ctx.session_id = NI_INVALID_SESSION_ID;
   ni_device_session_context_init(&(s->api_ctx));
   s->api_ctx.session_run_state = prev_state;
-  
+
   s->api_ctx.codec_format = NI_CODEC_FORMAT_H264;
   if (avctx->codec_id == AV_CODEC_ID_HEVC)
   {
@@ -610,7 +610,7 @@ static int xcoder_setup_encoder(AVCodecContext *avctx)
   s->total_frames_received = 0;
   s->gop_offset_count = 0;
   av_log(avctx, AV_LOG_INFO, "dts offset: %lld, gop_offset_count: %d\n",
-        s->dtsOffset, s->gop_offset_count);
+        (long long)s->dtsOffset, s->gop_offset_count);
 
   if (0 == strcmp(s->dev_xcoder, LIST_DEVICES_STR))
   {
@@ -646,9 +646,9 @@ static int xcoder_setup_encoder(AVCodecContext *avctx)
 
   memset( &(s->api_fme), 0, sizeof(ni_session_data_io_t) );
   memset( &(s->api_pkt), 0, sizeof(ni_session_data_io_t) );
-  
+
   if (avctx->width > 0 && avctx->height > 0)
-  {  
+  {
     ni_frame_buffer_alloc(&(s->api_fme.data.frame), ODD2EVEN(avctx->width), ODD2EVEN(avctx->height), 0, 0, s->api_ctx.bit_depth_factor);
   }
 
@@ -753,11 +753,11 @@ static int xcoder_open_encoder_device(AVCodecContext *avctx)
          frame->linesize[0], frame->linesize[1], frame->linesize[2],
          frame->width, frame->height,
          p_param->hevc_enc_params.conf_win_right, p_param->hevc_enc_params.conf_win_bottom);
-  
+
   int ret = -1;
   ctx->api_ctx.hw_id = ctx->dev_enc_idx;
   // User disabled this feature fromm the command line
-  
+
   if (ctx->yuv_copy_bypass != true)
   {
     ctx->api_ctx.yuv_copy_bypass = false;
@@ -773,7 +773,7 @@ static int xcoder_open_encoder_device(AVCodecContext *avctx)
   ctx->api_ctx.yuv_copy_bypass = false;
   strcpy(ctx->api_ctx.dev_xcoder, ctx->dev_xcoder);
   ret = ni_device_session_open(&ctx->api_ctx, NI_DEVICE_TYPE_ENCODER);
-  // // As the file handle may change we need to assign back 
+  // // As the file handle may change we need to assign back
   ctx->dev_xcoder = ctx->api_ctx.dev_xcoder_name;
   ctx->blk_xcoder = ctx->api_ctx.blk_xcoder_name;
   ctx->dev_enc_idx = ctx->api_ctx.hw_id;
@@ -813,7 +813,7 @@ static int xcoder_open_encoder_device(AVCodecContext *avctx)
     {
       // roi for H.264 is specified for 16x16 pixel macroblocks - 1 MB
       // is stored in each custom map entry
-  
+
       // number of MBs in each row
       uint32_t mbWidth = (linesize_aligned + 16 - 1) >> 4;
       // number of MBs in each column
@@ -826,7 +826,7 @@ static int xcoder_open_encoder_device(AVCodecContext *avctx)
       {
         return AVERROR(ENOMEM);
       }
-  
+
       // copy roi MBs QPs into custom map
       for (i = 0; i < numMbs; i++)
       {
@@ -847,7 +847,7 @@ static int xcoder_open_encoder_device(AVCodecContext *avctx)
     {
       // roi for H.265 is specified for 32x32 pixel subCTU blocks - 4
       // subCTU QPs are stored in each custom CTU map entry
-  
+
       // number of CTUs in each row
       uint32_t ctuWidth = (linesize_aligned + 64 -1) >> 6;
       // number of CTUs in each column
@@ -860,7 +860,7 @@ static int xcoder_open_encoder_device(AVCodecContext *avctx)
       uint32_t customMapSize = sizeof(ni_enc_hevc_roi_custom_map_t) *
       ctuWidth * ctuHeight;
       customMapSize = ((customMapSize + 15) / 16) * 16;
-  
+
       g_hevc_sub_ctu_roi_buf = (uint8_t *)malloc(numSubCtus);
       if (! g_hevc_sub_ctu_roi_buf)
       {
@@ -883,7 +883,7 @@ static int xcoder_open_encoder_device(AVCodecContext *avctx)
       {
         return AVERROR(ENOMEM);
       }
-  
+
       for (i = 0; i < ctuHeight; i++)
       {
         uint8_t *ptr = &g_hevc_sub_ctu_roi_buf[subCtuWidth * i * 2];
@@ -968,7 +968,7 @@ int xcoder_encode_close(AVCodecContext *avctx)
   {
     threadpool_destroy(&pool);
   }
-#endif 
+#endif
 
   ret = ni_device_session_close(&ctx->api_ctx, ctx->encoder_eof, NI_DEVICE_TYPE_ENCODER);
   if (NI_RETCODE_SUCCESS != ret)
@@ -1094,7 +1094,7 @@ static void* write_frame_thread(void* arg)
   av_log(ctx, AV_LOG_DEBUG, "write_frame_thread: session_id %d, device_handle %d\n", ctx->api_ctx.session_id, ctx->api_ctx.device_handle);
 
   av_log(ctx, AV_LOG_DEBUG, "write_frame_thread: ctx %p\n", ctx);
-  
+
   sent = ni_device_session_write(&ctx->api_ctx, &ctx->api_fme, NI_DEVICE_TYPE_ENCODER);
 
   av_log(ctx, AV_LOG_DEBUG, "write_frame_thread: size %d sent to xcoder\n", sent);
@@ -1188,7 +1188,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
   // leave encoder instance open to when the first frame buffer arrives so that
   // its stride size is known and handled accordingly.
 #if NI_ENCODER_OPEN_DEVICE
-  if ((frame && ctx->started == 0) && 
+  if ((frame && ctx->started == 0) &&
       ((frame->width != avctx->width) ||
       (frame->height != avctx->height) ||
       (frame->color_primaries != avctx->color_primaries) ||
@@ -1219,7 +1219,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
     // Errror when set this parameters in ni_encoder_params_set_value !!!!!!
     p_param->hevc_enc_params.conf_win_right = 0;
     p_param->hevc_enc_params.conf_win_bottom = 0;
-  
+
 #endif
 
     // if frame stride size is not as we expect it,
@@ -1317,13 +1317,13 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
     }
     av_log(avctx, AV_LOG_DEBUG, "yuv_copy_bypass from user:%d yuv_copy_bypass:%d\n", ctx->yuv_copy_bypass, ctx->api_ctx.yuv_copy_bypass);
 
-    
-    
+
+
     strcpy(ctx->api_ctx.dev_xcoder, ctx->dev_xcoder);
 
     ret = ni_device_session_open(&ctx->api_ctx, NI_DEVICE_TYPE_ENCODER);
 
-    // // As the file handle may change we need to assign back 
+    // // As the file handle may change we need to assign back
     ctx->dev_xcoder = ctx->api_ctx.dev_xcoder_name;
     ctx->blk_xcoder = ctx->api_ctx.blk_xcoder_name;
     ctx->dev_enc_idx = ctx->api_ctx.hw_id;
@@ -1456,12 +1456,12 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
         ctx->api_ctx.roi_avg_qp = (sumQp + (numSubCtus>>1)) / numSubCtus; // round off.
       }
     }
-    
+
   }
 
   av_log(avctx, AV_LOG_DEBUG, "XCoder send frame, pkt_size %d\n",
          frame ? frame->pkt_size : -1);
-#if 0  
+#if 0
   if (frame)
     av_log(avctx, AV_LOG_DEBUG, "*** NI enc In avframe pts: %lld  pkt_dts : %lld  best_effort : %lld \n", frame->pts, frame->pkt_dts, frame->best_effort_timestamp);
 #endif
@@ -1563,7 +1563,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
   = ctx->api_fme.data.frame.use_cur_src_as_long_term_pic
   = ctx->api_fme.data.frame.use_long_term_ref = 0;
 
-  ctx->api_fme.data.frame.sei_total_len 
+  ctx->api_fme.data.frame.sei_total_len
   = ctx->api_fme.data.frame.sei_cc_offset = ctx->api_fme.data.frame.sei_cc_len
   = ctx->api_fme.data.frame.sei_hdr_mastering_display_color_vol_offset
   = ctx->api_fme.data.frame.sei_hdr_mastering_display_color_vol_len
@@ -1678,7 +1678,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
           if (nb_bytes != nb_bytes_by_bits)
           {
             av_log(avctx, AV_LOG_ERROR, "Error VUI file size %d bytes != "
-                   "specified %d bits (%d bytes) !\n", nb_bytes,
+                   "specified %d bits (%d bytes) !\n", (int)nb_bytes,
                    p_param->reconf_hash[ctx->reconfigCount][2], nb_bytes_by_bits);
           }
           else
@@ -1690,7 +1690,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
             p_param->reconf_hash[ctx->reconfigCount][2];
             ctx->g_enc_change_params->vuiDataSizeBytes = nb_bytes;
             av_log(avctx, AV_LOG_DEBUG, "Reconf VUI %d bytes (%d bits)\n",
-                   nb_bytes, p_param->reconf_hash[ctx->reconfigCount][2]);
+                   (int)nb_bytes, p_param->reconf_hash[ctx->reconfigCount][2]);
 
             ctx->api_fme.data.frame.extra_data_len += sizeof(ni_encoder_change_params_t);
             ctx->api_fme.data.frame.reconf_len = sizeof(ni_encoder_change_params_t);
@@ -1807,7 +1807,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
     {
       if (ctx->api_ctx.frame_num >= 300)
       {
-        ctx->api_fme.data.frame.force_pic_qp = 
+        ctx->api_fme.data.frame.force_pic_qp =
         p_param->hevc_enc_params.rc.intra_qp;
       }
       else if (ctx->api_ctx.frame_num >= 200)
@@ -1973,7 +1973,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
     }
 
     ctx->api_fme.data.frame.extra_data_len += ctx->api_fme.data.frame.sei_total_len;
-    if ((ctx->api_fme.data.frame.sei_total_len || 
+    if ((ctx->api_fme.data.frame.sei_total_len ||
          ctx->api_fme.data.frame.roi_len)
         && !ctx->api_fme.data.frame.reconf_len)
     {
@@ -2097,17 +2097,17 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
          av_log(avctx, AV_LOG_TRACE, "Source address does not page align,Y:%p U:%p V:%p disable the zero copy\n", (const uint8_t *)frame->data[0], (const uint8_t *)frame->data[1],(const uint8_t *)frame->data[2]);
          ctx->api_ctx.yuv_copy_bypass = false;
       }
-  
+
       if (ctx->api_ctx.yuv_copy_bypass == true)
       {
         ctx->api_fme.data.frame.p_buffer_yuv_bypass_y =  (const uint8_t *)frame->data[NI_Y_ELEMENT];
         ctx->api_fme.data.frame.p_buffer_yuv_bypass_u =  (const uint8_t *)frame->data[NI_U_ELEMENT];
         ctx->api_fme.data.frame.p_buffer_yuv_bypass_v =  (const uint8_t *)frame->data[NI_V_ELEMENT];
 
-        if (((const uint8_t *)frame->data[NI_U_ELEMENT] - (const uint8_t *)frame->data[NI_Y_ELEMENT]) != (ctx->api_fme.data.frame.p_data[NI_U_ELEMENT] - ctx->api_fme.data.frame.p_data[NI_Y_ELEMENT]) || 
+        if (((const uint8_t *)frame->data[NI_U_ELEMENT] - (const uint8_t *)frame->data[NI_Y_ELEMENT]) != (ctx->api_fme.data.frame.p_data[NI_U_ELEMENT] - ctx->api_fme.data.frame.p_data[NI_Y_ELEMENT]) ||
            ((const uint8_t *)frame->data[NI_V_ELEMENT] - (const uint8_t *)frame->data[NI_U_ELEMENT]) != (ctx->api_fme.data.frame.p_data[NI_V_ELEMENT] - ctx->api_fme.data.frame.p_data[NI_U_ELEMENT]))
         {
-            
+
             ctx->api_ctx.yuv_copy_bypass_seperate = true;
             // The YUV from ffmpeg is seperate, so we check the data[1] alignment
             if (((long int)((const uint8_t *)frame->data[NI_U_ELEMENT])) % sysconf(_SC_PAGESIZE) || ((long int)((const uint8_t *)frame->data[NI_V_ELEMENT])) % sysconf(_SC_PAGESIZE))
@@ -2122,7 +2122,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
                 ctx->api_ctx.max_nvme_io_size = 511*sysconf(_SC_PAGESIZE);
               }
             }
-            
+
             av_log(avctx, AV_LOG_DEBUG, "The source data memory address Y:%p U:%p V:%p, dest data memory address: Y:%p U:%p V:%p\n", (const uint8_t *)frame->data[0], \
                                                                                                                                      (const uint8_t *)frame->data[1], \
                                                                                                                                      (const uint8_t *)frame->data[2], \
@@ -2225,7 +2225,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
           ctx->api_fme.data.frame.data_len[1],
           ctx->api_fme.data.frame.data_len[2]);
 
-    uint8_t *dst = (uint8_t *)ctx->api_fme.data.frame.p_data[2] + 
+    uint8_t *dst = (uint8_t *)ctx->api_fme.data.frame.p_data[2] +
     ctx->api_fme.data.frame.data_len[2] + NI_APP_ENC_FRAME_META_DATA_SIZE;
 
     // fill in reconfig data, if enabled
@@ -2338,7 +2338,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
 
       free(udu_sei);
     }
-  }  
+  }
 
   ctx->sentFrame = 1;
 
@@ -2357,7 +2357,7 @@ int xcoder_send_frame(AVCodecContext *avctx, const AVFrame *frame)
     {
       sent = xcoder_encode_reset(avctx);
     }
-  
+
     if (sent < 0)
     {
       ret = AVERROR(EIO);
