@@ -336,8 +336,9 @@ def main(argv):
       '--enable-libx264',
       '--enable-encoder=libx264',
       '--enable-decoder=h264',
+      '--enable-libxcoder',
       '--enable-libfdk-aac',
-      '--enable-encoder=libfdk_aac',      
+      '--enable-encoder=libfdk_aac',
       '--enable-gpl',
       '--enable-nvenc',
       '--enable-cuda',
@@ -376,7 +377,7 @@ def main(argv):
       '--enable-decoder=pcm_s16be,pcm_s24be,pcm_mulaw,pcm_alaw',
       '--enable-demuxer=ogg,matroska,wav,flac,flv,image_png_pipe',
       '--enable-parser=opus,vorbis,flac',
-      '--enable-protocol=file,pipe,http',      
+      '--enable-protocol=file,pipe,http',
 
       # Setup include path so Chromium's libopus can be used.
       '--extra-cflags=-I' + os.path.join(CHROMIUM_ROOT_DIR,
