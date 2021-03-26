@@ -81,6 +81,7 @@ if (use_linux_config && current_cpu == "x64") {
     "libavcodec/h264idct.c",
     "libavcodec/h264pred.c",
     "libavcodec/h264qpel.c",
+    "libavcodec/h264_mp4toannexb_bsf.c",
     "libavcodec/idctdsp.c",
     "libavcodec/x86/idctdsp_init.c",
     "libavcodec/hpeldsp.c",
