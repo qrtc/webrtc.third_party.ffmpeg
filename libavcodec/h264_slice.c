@@ -845,7 +845,7 @@ static enum AVPixelFormat get_pixel_format(H264Context *h, int force_callback)
             if (h->avctx->codec->pix_fmts)
                 choices = h->avctx->codec->pix_fmts;
             else if (h->avctx->color_range == AVCOL_RANGE_JPEG)
-                *fmt++ = AV_PIX_FMT_YUVJ420P;
+                *fmt++ = AV_PIX_FMT_YUV420P;
             else
                 *fmt++ = AV_PIX_FMT_YUV420P;
         }
